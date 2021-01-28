@@ -1,0 +1,60 @@
+---
+title: "Assignment #3"
+output: html_document
+---
+# Project Info  
+**January 28, 2021**  
+**Author**: rbio1 
+**Github Repository**:[rbio/432W3](https://github.com/rbio1/432W3)  
+
+***
+
+```{r setup, include=FALSE}
+library(dplyr)
+options(dplyr.summarise.inform = FALSE)
+```  
+Load the FallopiaData.csv from InputData folder using a relative path  
+```{r}
+FalloData<-read.csv("./InputData/FallopiaData.csv")
+```
+The following operations will:  
+
+* Remove rows with ‘Total’ biomass < 60
+* Reorder the columns so that they are in the order: ‘Total’, ‘Taxon’, ‘Senario’, ‘Nutrients’, and remove the other columns
+* Make a new column TotalG, which converts the ‘Total’ column from mg to grams AND replace Total with TotalG, and add it to the dataset.  
+```{r}
+FalloData<-FalloData %>%
+  filter(Total>=60) %>%
+  select(Total,Taxon,Scenario,Nutrients) %>%
+  transmute(TotalG=Total/1000,Taxon,Scenario,Nutrients)
+```
+The data frame "FalloData" now consists of 45 observations of 4 variables  
+
+***
+The custom function ASOFun will take two inputs from the user: 1. a vector of data to process (e.g. column from a data.frame object) and 2. a string that defines what calculation to perform.  
+
+* if string #2 is "Average" then calculate the average value for the column named in vector #1  
+* if string #2 is "Sum" then calculate the sum of values for the column named in vector #1
+* if string #2 is "Observations" then count the number of observed values for the column named in vector #1
+* if string #2 is anything else, then output an error to the user
+```{r}
+ASOFun<-function(Column,Command){
+  if(Command=="Sum"){
+    return(sum(Column))}
+  if(Command=="Observations"){
+    return(length(Column))}
+  if(Command=="Average"){
+    return(sum(Column)/length(Column))}
+  else(return("Error:Check Input"))
+}
+```
+The following code will count the total number of observations in the 'Taxon' column.
+```{r}
+ASOFun(FalloData$Taxon,"Observations")
+```
+The average TotalG for each of the two nutrient concentrations can be calculated by the custom function in cooperation with the *dplyr* operation "group_by"
+```{r}
+FalloData %>%
+  group_by(Nutrients) %>%
+  summarize(Mean=ASOFun(TotalG,"Average"))
+```
