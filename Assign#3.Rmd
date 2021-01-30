@@ -4,14 +4,13 @@ output: html_document
 ---
 # Project Info  
 **January 28, 2021**  
-**Author**: rbio1 
-**Github Repository**:[rbio/432W3](https://github.com/rbio1/432W3)  
+**Author**: rbio1   
+**Github Repository**: [rbio/432W3](https://github.com/rbio1/432W3)  
 
 ***
 
 ```{r setup, include=FALSE}
 library(dplyr)
-options(dplyr.summarise.inform = FALSE)
 ```  
 Load the FallopiaData.csv from InputData folder using a relative path  
 ```{r}
@@ -19,9 +18,12 @@ FalloData<-read.csv("./InputData/FallopiaData.csv")
 ```
 The following operations will:  
 
-* Remove rows with ‘Total’ biomass < 60
-* Reorder the columns so that they are in the order: ‘Total’, ‘Taxon’, ‘Senario’, ‘Nutrients’, and remove the other columns
+* Remove rows with ‘Total’ biomass < 60  
+  + Using filter() 
+* Reorder the columns so that they are in the order: ‘Total’, ‘Taxon’, ‘Senario’, ‘Nutrients’, and remove the other columns  
+  + Using select()
 * Make a new column TotalG, which converts the ‘Total’ column from mg to grams AND replace Total with TotalG, and add it to the dataset.  
+  + Using transmute()
 ```{r}
 FalloData<-FalloData %>%
   filter(Total>=60) %>%
@@ -31,7 +33,7 @@ FalloData<-FalloData %>%
 The data frame "FalloData" now consists of 45 observations of 4 variables  
 
 ***
-The custom function ASOFun will take two inputs from the user: 1. a vector of data to process (e.g. column from a data.frame object) and 2. a string that defines what calculation to perform.  
+The custom function 'ASOFun' will take two inputs from the user: 1. a vector of data to process (e.g. column from a data.frame object) and 2. a string that defines what calculation to perform.  
 
 * if string #2 is "Average" then calculate the average value for the column named in vector #1  
 * if string #2 is "Sum" then calculate the sum of values for the column named in vector #1
@@ -57,4 +59,10 @@ The average TotalG for each of the two nutrient concentrations can be calculated
 FalloData %>%
   group_by(Nutrients) %>%
   summarize(Mean=ASOFun(TotalG,"Average"))
+```  
+
+***
+The new data frame is saved to a file in the Output folder  
+```{r}
+write.csv(FalloData,"./Output/WrangledData.csv")
 ```
